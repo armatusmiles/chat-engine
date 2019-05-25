@@ -1,4 +1,4 @@
-package main
+package rooms
 
 type IChatRoom interface {
 	CountClients() uint32

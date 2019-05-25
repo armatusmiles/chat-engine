@@ -10,7 +10,7 @@ import (
 )
 
 var log = logrus.New()
-var addr = flag.String("addr", ":8080", "http service address")
+var addr = flag.String("addr", ":8888", "http service address")
 var debugLevel = flag.Int("debugLevel", 5, "")
 
 var upgrader = websocket.Upgrader{
@@ -41,14 +41,36 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Debug("Read:", err)
+			log.Debugln(err)
 			break
 		}
+		messageHandler(conn, mt, message)
 		err = conn.WriteMessage(mt, message)
 		if err != nil {
-			log.Debug("Write:", err)
+			log.Debugln(err)
 			break
 		}
+	}
+
+}
+
+func messageHandler(con *websocket.Conn, messageType int, message []byte) {
+	// con.SetCloseHandler
+	// con.SetPingHandler
+	// con.SetPongHandler
+	switch messageType {
+	case websocket.TextMessage:
+	case websocket.BinaryMessage:
+		log.Warning("Binary message not supported for now. Connection is closed")
+		con.Close()
+	case websocket.CloseMessage:
+		con.Close()
+	case websocket.PingMessage:
+		// TODO send pong?
+	case websocket.PongMessage:
+		// Do nothing
+	default:
+		log.Warning("Unknown websocket message code. Connection is closed")
 	}
 }
 
