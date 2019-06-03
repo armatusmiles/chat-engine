@@ -11,7 +11,8 @@ type IRoomBroadcaster interface {
 }
 
 type RoomBroadcaster struct {
-	clients *[]clients.ChatClient
+	clients []clients.ChatClient
+	ReadCh  chan []dbmanage.ChatMessage
 }
 
 func (rb *RoomBroadcaster) BroadcastMessage(msg *dbmanage.ChatMessage) {

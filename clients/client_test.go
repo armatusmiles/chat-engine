@@ -16,24 +16,25 @@ var upgrader = websocket.Upgrader{}
 
 var mockMsg = dbmanage.ChatMessage{UserId: 111, Message: "Hello client"}
 
-func echo(w http.ResponseWriter, r *http.Request) {
+func servWs(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return
 	}
-	chatClient := clients.NewChatClient(c, "mock-session-id")
 
-	_, _, err = c.ReadMessage()
-	if err != nil {
-		return
-	}
+	mockChan := make(chan dbmanage.ChatMessage)
+
+	chatClient := clients.NewChatClient(c, "mock-session-id", mockChan)
+
+	// wait for message from client
+	<-mockChan
 
 	chatClient.SendMessage(&mockMsg)
 	c.Close()
 }
 
 func TestSendMessage(t *testing.T) {
-	s := httptest.NewServer(http.HandlerFunc(echo))
+	s := httptest.NewServer(http.HandlerFunc(servWs))
 	defer s.Close()
 
 	// Convert http://127.0.0.1 to ws://127.0.0.
@@ -45,13 +46,18 @@ func TestSendMessage(t *testing.T) {
 	}
 	defer ws.Close()
 
-	if err := ws.WriteMessage(websocket.TextMessage, []byte("someProtoData")); err != nil {
+	bMsg, _ := proto.Marshal(&mockMsg)
+	if err := ws.WriteMessage(websocket.BinaryMessage, bMsg); err != nil {
 		t.Fatalf("%v", err)
 	}
 
-	_, p, err := ws.ReadMessage()
+	mt, p, err := ws.ReadMessage()
 	if err != nil {
 		t.Fatalf("%v", err)
+	}
+
+	if mt != websocket.BinaryMessage {
+		t.Fatal("Type of message must be binary (proto)")
 	}
 
 	msg := dbmanage.ChatMessage{}
@@ -64,4 +70,5 @@ func TestSendMessage(t *testing.T) {
 	if msg.Message != mockMsg.Message {
 		t.Fatal("Wrong Message response")
 	}
+
 }
