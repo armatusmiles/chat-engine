@@ -76,6 +76,9 @@ func messageHandler(con *websocket.Conn, messageType int, message []byte) {
 func main() {
 	log.Out = os.Stdout
 	log.SetLevel(logrus.Level(*debugLevel))
+	log.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+	})
 
 	flag.Parse()
 
