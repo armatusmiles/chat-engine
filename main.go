@@ -37,6 +37,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 		return
 	}
+	// TODO
+	// Add check session-id. If id is invalid shutdown connection
+
 	defer conn.Close()
 	for {
 		mt, message, err := conn.ReadMessage()
@@ -51,13 +54,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-
 }
 
 func messageHandler(con *websocket.Conn, messageType int, message []byte) {
-	// con.SetCloseHandler
-	// con.SetPingHandler
-	// con.SetPongHandler
 	switch messageType {
 	case websocket.TextMessage:
 	case websocket.BinaryMessage:

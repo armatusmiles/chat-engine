@@ -1,7 +1,7 @@
 package clients
 
-import "github.com/armatusmiles/gospeak-chat-engine/db/models"
+import "github.com/gospeak/protorepo/dbmanage"
 
 type IChatClient interface {
-	SendMessage(msg *models.Message)
+	SendMessage(msg *dbmanage.ChatMessage)
 }

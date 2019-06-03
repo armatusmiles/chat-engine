@@ -1,6 +1,8 @@
 package rooms
 
+import "github.com/armatusmiles/gospeak-chat-engine/clients"
+
 type FreeChatRoom struct {
 	broadcaster *RoomBroadcaster
-	clients     *[]ChatClient
+	clients     *[]clients.ChatClient
 }

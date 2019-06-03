@@ -1,7 +1,9 @@
-package main
+package rooms
 
 import (
-	"github.com/armatusmiles/gospeak-chat-engine/db/models"
+	"github.com/armatusmiles/gospeak-chat-engine/clients"
+	"github.com/armatusmiles/gospeak-db-manage-service/redis/models"
+	"github.com/gospeak/protorepo/dbmanage"
 )
 
 type IRoomBroadcaster interface {
@@ -9,9 +11,9 @@ type IRoomBroadcaster interface {
 }
 
 type RoomBroadcaster struct {
-	clients *[]ChatClient
+	clients *[]clients.ChatClient
 }
 
-func (rb *RoomBroadcaster) BroadcastMessage(msg *models.Message) {
+func (rb *RoomBroadcaster) BroadcastMessage(msg *dbmanage.ChatMessage) {
 	// TODO send message to all client
 }
