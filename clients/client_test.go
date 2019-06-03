@@ -3,6 +3,7 @@ package clients_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -23,14 +24,38 @@ func servWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mockChan := make(chan dbmanage.ChatMessage)
-
 	chatClient := clients.NewChatClient(c, "mock-session-id", mockChan)
-
-	// wait for message from client
-	<-mockChan
 
 	chatClient.SendMessage(&mockMsg)
 	c.Close()
+}
+
+func servCloseConnTest(w http.ResponseWriter, r *http.Request) {
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+
+	mockChan := make(chan dbmanage.ChatMessage)
+	chatClient := clients.NewChatClient(c, "mock-session-id", mockChan)
+	chatClient.CloseConnection()
+}
+
+func TestCloseConnection(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(servWs))
+	defer s.Close()
+
+	u := "ws" + strings.TrimPrefix(s.URL, "http")
+
+	for i := 0; i < 50; i++ {
+		_, _, err := websocket.DefaultDialer.Dial(u, nil)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+	}
+	if runtime.NumGoroutine() > 10 {
+		t.Fatal("Memory leak gorutine detected")
+	}
 }
 
 func TestSendMessage(t *testing.T) {
@@ -45,11 +70,6 @@ func TestSendMessage(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 	defer ws.Close()
-
-	bMsg, _ := proto.Marshal(&mockMsg)
-	if err := ws.WriteMessage(websocket.BinaryMessage, bMsg); err != nil {
-		t.Fatalf("%v", err)
-	}
 
 	mt, p, err := ws.ReadMessage()
 	if err != nil {

@@ -45,6 +45,10 @@ func (c *ChatClient) readThread() {
 	}
 }
 
+func (c *ChatClient) CloseConnection() {
+	c.conn.Close()
+}
+
 // SendMessage sends message to client
 func (c *ChatClient) SendMessage(msg *dbm.ChatMessage) {
 	// todo write in channel
