@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/armatusmiles/gospeak-chat-engine/clients"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
+	"github.com/gospeak/chat-engine/clients"
 	"github.com/gospeak/protorepo/dbmanage"
 )
 
