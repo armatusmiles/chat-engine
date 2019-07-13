@@ -15,7 +15,7 @@ import (
 
 var upgrader = websocket.Upgrader{}
 
-var mockMsg = dbmanage.ChatMessage{UserId: 111, Message: "Hello client"}
+var mockMsg = dbmanage.ChatMessage{UserId: "111", Message: "Hello client"}
 
 func servWs(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)

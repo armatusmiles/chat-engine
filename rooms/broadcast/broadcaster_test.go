@@ -22,7 +22,7 @@ var broadcaster *broadcast.Broadcaster
 
 const mockClientsExpectedCount = 3
 
-var mockMsg = dbmanage.ChatMessage{UserId: 111, Message: "Hello client"}
+var mockMsg = dbmanage.ChatMessage{UserId: "111", Message: "Hello client"}
 var serveMutex = sync.Mutex{}
 
 func servWs(w http.ResponseWriter, r *http.Request) {

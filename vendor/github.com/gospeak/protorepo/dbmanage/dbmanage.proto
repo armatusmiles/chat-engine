@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package dbmanage;
+
+service DbManage {
+    // returns true if save in db successful
+    rpc RegisterUser(AuthData) returns (AuthResponse);
+    rpc SaveRoomChatMessage(RoomChatMessage) returns (SeqNumberResponse);
+    rpc SavePrivateChatMessage(PrivateChatMessage) returns (SeqNumberResponse);
+    rpc GetChatMessages(ChatMessagesInterval) returns  (ChatMessageResponse);
+    // returns status and non empty sessionID if Auth is successful
+    rpc Authenticate(AuthData) returns (AuthResponse); 
+}
+
+// if offset_top == 0, we got last N(count_messages) messages
+message ChatMessagesInterval {
+    uint32 count_messages = 1;
+    uint32 offset_top = 2;
+}
+
+message AuthResponse {
+    string username = 1;
+    string email = 2;
+    string session_id = 3;
+}
+
+message AuthData {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message SeqNumber {
+    uint64 seq_number = 1;
+}
+
+// sequence number of message in room
+message SeqNumberResponse {
+    SeqNumber seq_number = 1;
+}
+
+message ChatMessage {
+    string user_id     = 1;
+    uint64 send_time   = 2;
+    string message_id  = 3;
+    string message     = 4;
+}
+
+message ChatMessageResponse {
+    repeated ChatMessage messages = 1;
+}
+
+message RoomChatMessage {
+    ChatMessage message = 1;
+    string room_id      = 2;
+}
+
+message PrivateChatMessage {
+    ChatMessage message = 1;
+    string dest_user_id = 2;
+}
