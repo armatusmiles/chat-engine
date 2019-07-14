@@ -10,6 +10,7 @@ service DbManage {
     rpc GetChatMessages(ChatMessagesInterval) returns  (ChatMessageResponse);
     // returns status and non empty sessionID if Auth is successful
     rpc Authenticate(AuthData) returns (AuthResponse); 
+    rpc AddLike(LikeMessage) returns (Empty);
 }
 
 // if offset_top == 0, we got last N(count_messages) messages
@@ -44,6 +45,14 @@ message ChatMessage {
     uint64 send_time   = 2;
     string message_id  = 3;
     string message     = 4;
+}
+
+message LikeMessage {
+    string message_id = 1;
+    uint64 count      = 2;
+}
+
+message Empty {
 }
 
 message ChatMessageResponse {

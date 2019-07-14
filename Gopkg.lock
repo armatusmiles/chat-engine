@@ -37,15 +37,15 @@
   name = "github.com/gospeak/db-manage-service"
   packages = ["redis/models"]
   pruneopts = "UT"
-  revision = "2eb82a2adef7b1ebde5c7e2d9ea938b23e00d0fd"
+  revision = "a3406a6910aed7600f207cec1501060d148cc5b5"
 
 [[projects]]
   branch = "master"
-  digest = "1:27f9f7898c6097fe03487e34a9e7fe196b1a37f1d9717e9c06a4ec7451a31423"
+  digest = "1:0c4800e85910dd7d3ceaf743b1e5bb0c4a5a8289a016dbea3d80f82fc50ff389"
   name = "github.com/gospeak/protorepo"
   packages = ["dbmanage"]
   pruneopts = "UT"
-  revision = "5ab8a849828aae1a45b857e0e0f7213db17cf350"
+  revision = "8bbda26ffb0f6055e0ace84ced204fd7868dadc6"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -80,11 +80,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5b3f90037a9027c43bdcae488c39d41aadecb9d85e645bb62b773a0a6f6e86b8"
+  digest = "1:5632b0c4d972da51b5914f09fc5c1a8535e9d8d5d937e95ef83c423a0dd67f13"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "6ec70d6a5542cba804c6d16ebe8392601a0b7b60"
+  revision = "fae7ac547cb717d141c433a2a173315e216b64c4"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
