@@ -29,7 +29,10 @@ window.onload = function () {
     };
 
     if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
+        var sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        document.cookie = 'session_id=' + sessionId + '; path=/';
+        conn = new WebSocket("ws://" + document.location.host + "/rooms/1/enter");
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";

@@ -11,33 +11,22 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/gospeak/chat-engine/clients"
 	"github.com/gospeak/protorepo/dbmanage"
+	"github.com/stretchr/testify/assert"
 )
-
-var upgrader = websocket.Upgrader{}
 
 var mockMsg = dbmanage.ChatMessage{UserId: "111", Message: "Hello client"}
 
 func servWs(w http.ResponseWriter, r *http.Request) {
+	var upgrader = websocket.Upgrader{}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	mockChan := make(chan dbmanage.ChatMessage)
 	chatClient := clients.NewChatClient(c, "mock-session-id", mockChan)
 
 	chatClient.SendMessage(&mockMsg)
-	c.Close()
-}
-
-func servCloseConnTest(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		return
-	}
-
-	mockChan := make(chan dbmanage.ChatMessage)
-	chatClient := clients.NewChatClient(c, "mock-session-id", mockChan)
 	chatClient.CloseConnection()
 }
 
@@ -49,13 +38,9 @@ func TestCloseConnection(t *testing.T) {
 
 	for i := 0; i < 50; i++ {
 		_, _, err := websocket.DefaultDialer.Dial(u, nil)
-		if err != nil {
-			t.Fatalf("%v", err)
-		}
+		assert.Nil(t, err)
 	}
-	if runtime.NumGoroutine() > 10 {
-		t.Fatal("Memory leak gorutine detected")
-	}
+	assert.True(t, runtime.NumGoroutine() < 10, "Memory leak gorutine detected")
 }
 
 func TestSendMessage(t *testing.T) {
@@ -66,29 +51,32 @@ func TestSendMessage(t *testing.T) {
 	u := "ws" + strings.TrimPrefix(s.URL, "http")
 
 	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	assert.Nil(t, err)
 	defer ws.Close()
 
+	// wait from mock message from server
 	mt, p, err := ws.ReadMessage()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	if mt != websocket.BinaryMessage {
-		t.Fatal("Type of message must be binary (proto)")
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, mt, websocket.BinaryMessage, "Message type must be binary")
 
 	msg := dbmanage.ChatMessage{}
-	proto.Unmarshal(p, &msg)
+	err = proto.Unmarshal(p, &msg)
+	assert.Nil(t, err)
 
-	if msg.UserId != mockMsg.UserId {
-		t.Fatal("Wrong userID response")
-	}
+	assert.Equal(t, msg.UserId, mockMsg.UserId, "Wrong userID response")
+	assert.Equal(t, msg.Message, mockMsg.Message, "Wrong Message response")
+}
 
-	if msg.Message != mockMsg.Message {
-		t.Fatal("Wrong Message response")
-	}
+func TestSendNotProtoMsg(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(servWs))
+	defer s.Close()
 
+	u := "ws" + strings.TrimPrefix(s.URL, "http")
+
+	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
+	assert.Nil(t, err)
+
+	chatClient := clients.NewChatClient(ws, "mock-session-id", make(chan dbmanage.ChatMessage))
+	err = chatClient.SendMessage(nil)
+	assert.NotNil(t, err)
 }
