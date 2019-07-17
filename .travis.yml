@@ -6,7 +6,11 @@ notifications:
 language: go
 go:
   - 1.12.x
-  
+
+before_install:
+  - go get github.com/mattn/goveralls
+
 script:
   - go test -v -race ./...
   - go build
+  - $GOPATH/bin/goveralls -service=travis-ci
