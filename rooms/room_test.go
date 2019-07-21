@@ -57,11 +57,13 @@ func TestAddClient(t *testing.T) {
 
 func TestRemoveClient(t *testing.T) {
 	ws := createMockWs()
+	ws2 := createMockWs()
 	defer ws.Close()
+	defer ws2.Close()
 
 	cr := rooms.NewGeneralChatRoom()
 	assert.True(t, cr.AddClient(ws, "ID"))
-	assert.True(t, cr.AddClient(ws, "ID2"))
+	assert.True(t, cr.AddClient(ws2, "ID2"))
 	assert.False(t, cr.AddClient(ws, "ID"), "Add client with same id must be failed")
 	assert.Equal(t, cr.CountClients(), uint32(2))
 	assert.True(t, cr.RemoveClientBySessionID("ID"))

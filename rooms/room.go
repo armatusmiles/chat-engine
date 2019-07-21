@@ -19,6 +19,9 @@ func NewGeneralChatRoom() *GeneralChatRoom {
 }
 
 func (gcr *GeneralChatRoom) AddClient(conn *websocket.Conn, sessionID string) bool {
+	if gcr.clients.IsExists(sessionID) {
+		return false
+	}
 	client := clients.NewChatClient(conn, sessionID, gcr.broadcaster.ReadCh)
 	return gcr.clients.Add(*client)
 }
