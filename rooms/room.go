@@ -18,6 +18,7 @@ func NewGeneralChatRoom() *GeneralChatRoom {
 	return gcr
 }
 
+// You should think about close websocket.Conn if this function return false
 func (gcr *GeneralChatRoom) AddClient(conn *websocket.Conn, sessionID string) bool {
 	if gcr.clients.IsExists(sessionID) {
 		return false
