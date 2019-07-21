@@ -2,28 +2,28 @@ package clients
 
 import (
 	"sync"
+	"sync/atomic"
 )
 
 // Threadsafe list
 type ClientList struct {
-	clients map[string]ChatClient
+	counter uint32
 	mutex   *sync.RWMutex
+	clients map[string]ChatClient
 }
 
 func NewChatClientList() *ClientList {
 	cl := &ClientList{
 		clients: make(map[string]ChatClient),
 		mutex:   &sync.RWMutex{},
+		counter: 0,
 	}
 	return cl
 }
 
 // Don't forget. Count items in map can be changed after return value
-func (cl *ClientList) Count() int {
-	cl.mutex.RLock()
-	len := len(cl.clients)
-	cl.mutex.RUnlock()
-	return len
+func (cl *ClientList) Count() uint32 {
+	return atomic.LoadUint32(&cl.counter)
 }
 
 // add only unique client
@@ -37,6 +37,8 @@ func (cl *ClientList) Add(client ChatClient) bool {
 	}
 
 	cl.clients[client.sessionID] = client
+	atomic.AddUint32(&cl.counter, 1)
+
 	return true
 }
 
@@ -50,5 +52,7 @@ func (cl *ClientList) RemoveBySessionID(ID string) bool {
 	}
 
 	delete(cl.clients, ID)
+	atomic.AddUint32(&cl.counter, ^uint32(0))
+
 	return true
 }

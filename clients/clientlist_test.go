@@ -50,7 +50,7 @@ func initMockClientsAndServ() (*httptest.Server, *clients.ClientList) {
 			panic("Error add Chat Client")
 		}
 	}
-	if cl.Count() != len(chatClients) {
+	if cl.Count() != uint32(len(chatClients)) {
 		panic("Count clients is wrong")
 	}
 	return s, cl

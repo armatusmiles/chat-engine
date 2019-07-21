@@ -24,7 +24,7 @@ func (gcr *GeneralChatRoom) AddClient(conn *websocket.Conn, sessionID string) bo
 }
 
 func (gcr *GeneralChatRoom) CountClients() uint32 {
-	return uint32(gcr.clients.Count())
+	return gcr.clients.Count()
 }
 
 func (gcr *GeneralChatRoom) RemoveClientBySessionID(ID string) bool {
