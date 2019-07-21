@@ -56,3 +56,10 @@ func (cl *ClientList) RemoveBySessionID(ID string) bool {
 
 	return true
 }
+
+func (cl *ClientList) IsExists(ID string) bool {
+	cl.mutex.RLock()
+	defer cl.mutex.RUnlock()
+	_, exists := cl.clients[ID]
+	return exists
+}

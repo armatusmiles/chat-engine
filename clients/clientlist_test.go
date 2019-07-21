@@ -93,3 +93,10 @@ func TestRemoveClient(t *testing.T) {
 	assert.False(t, cl.RemoveBySessionID("1"))
 	assert.Equal(t, countBefore-1, cl.Count())
 }
+
+func TestIsExists(t *testing.T) {
+	s, cl := initMockClientsAndServ()
+	defer s.Close()
+	assert.True(t, cl.IsExists("1"))
+	assert.False(t, cl.IsExists("notExistsKey"))
+}

@@ -77,6 +77,7 @@ func TestSendNotProtoMsg(t *testing.T) {
 	assert.Nil(t, err)
 
 	chatClient := clients.NewChatClient(ws, "mock-session-id", make(chan dbmanage.ChatMessage))
+	assert.Equal(t, chatClient.GetSessionID(), "mock-session-id")
 	err = chatClient.SendMessage(nil)
 	assert.NotNil(t, err)
 }
