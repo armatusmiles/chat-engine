@@ -33,10 +33,10 @@ func (c *ChatClient) readThread() {
 	for {
 		mt, message, err := c.conn.ReadMessage()
 		if err != nil {
-			log.Error(err)
+			log.Info(err)
 			return
 		}
-		log.Debugf("Read message readThread() %s", message)
+
 		if mt != websocket.BinaryMessage {
 			log.Error("Must be binary (proto) message!")
 		}

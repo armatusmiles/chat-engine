@@ -12,7 +12,7 @@ type GeneralChatRoom struct {
 
 func NewGeneralChatRoom() *GeneralChatRoom {
 	gcr := &GeneralChatRoom{
-		clients: &clients.ClientList{},
+		clients: clients.NewChatClientList(),
 	}
 	gcr.broadcaster = clients.NewBroadcaster(gcr.clients)
 	return gcr
