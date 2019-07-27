@@ -1,11 +1,15 @@
 package clients_test
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/gospeak/chat-engine/clients"
 	dbm "github.com/gospeak/protorepo/dbmanage"
@@ -54,6 +58,55 @@ func initMockClientsAndServ() (*httptest.Server, *clients.ClientList) {
 		panic("Count clients is wrong")
 	}
 	return s, cl
+}
+
+func TestSendMessageToAll(t *testing.T) {
+	cl := clients.NewChatClientList()
+	const countExpectedClients = uint32(4)
+	mux := &sync.Mutex{}
+	clientCounter := 0
+	servWs := func(w http.ResponseWriter, r *http.Request) {
+		mux.Lock()
+		defer mux.Unlock()
+		var upgrader = websocket.Upgrader{}
+		ws, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		c := clients.NewChatClient(ws, strconv.Itoa(clientCounter), make(chan dbm.ChatMessage))
+		clientCounter++
+		if cl.Add(*c) != true {
+			log.Fatal("Error to add client")
+		}
+		if cl.Count() == countExpectedClients {
+			cl.SendMessageToAll(&mockMsg)
+		}
+	}
+	s := httptest.NewServer(http.HandlerFunc(servWs))
+	defer s.Close()
+
+	// Convert http://127.0.0.1 to ws://127.0.0.
+	u := strings.ReplaceAll(s.URL, "http", "ws")
+	var wsCLients [countExpectedClients]*websocket.Conn
+	for i := 0; i < int(countExpectedClients); i++ {
+		ws, _, err := websocket.DefaultDialer.Dial(u, nil)
+		if err != nil {
+			panic(err)
+		}
+		wsCLients[i] = ws
+	}
+
+	for i := 0; i < int(countExpectedClients); i++ {
+		mt, msg, _ := wsCLients[i].ReadMessage()
+		assert.Equal(t, websocket.BinaryMessage, mt)
+		var unmarshalMsg dbm.ChatMessage
+		err := proto.Unmarshal(msg, &unmarshalMsg)
+		assert.Nil(t, err)
+		assert.Equal(t, unmarshalMsg.GetMessage(), mockMsg.GetMessage())
+		assert.Equal(t, unmarshalMsg.GetUserId(), mockMsg.GetUserId())
+		assert.Equal(t, unmarshalMsg.GetMessageId(), mockMsg.GetMessageId())
+		assert.Equal(t, unmarshalMsg.GetSendTime(), mockMsg.GetSendTime())
+	}
 }
 
 func TestNewClientList(t *testing.T) {
