@@ -19,8 +19,7 @@ var upgrader = websocket.Upgrader{}
 func servWs(w http.ResponseWriter, r *http.Request) {
 	_, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Print(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 
@@ -28,7 +27,8 @@ func createMockWs() *websocket.Conn {
 	s := httptest.NewServer(http.HandlerFunc(servWs))
 	defer s.Close()
 	// Convert http://127.0.0.1 to ws://127.0.0.
-	u := "ws" + strings.TrimPrefix(s.URL, "http")
+	u := strings.ReplaceAll(s.URL, "http", "ws")
+
 	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
 	if err != nil {
 		log.Print(err)

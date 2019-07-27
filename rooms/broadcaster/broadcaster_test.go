@@ -1,4 +1,4 @@
-package clients_test
+package broadcaster_test
 
 import (
 	"net/http"
@@ -11,18 +11,21 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/gospeak/chat-engine/clients"
+	"github.com/gospeak/chat-engine/rooms/broadcaster"
 	"github.com/gospeak/protorepo/dbmanage"
 	"github.com/stretchr/testify/assert"
 )
+
+var mockMsg = dbmanage.ChatMessage{UserId: "111", Message: "Hello client"}
 
 func TestBroadcast(t *testing.T) {
 
 	var upgrader = websocket.Upgrader{}
 	clientList := clients.NewChatClientList()
-	broadcaster := clients.NewBroadcaster(clientList)
+	mux := &sync.RWMutex{}
+	broadcaster := broadcaster.NewBroadcaster(clientList, mux)
 	const mockClientsExpectedCount = 3
 	var id = 0
-	mux := &sync.Mutex{}
 
 	servWs := func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
@@ -33,8 +36,8 @@ func TestBroadcast(t *testing.T) {
 		mux.Lock() // mux for fix data race
 		chatClient := clients.NewChatClient(c, strconv.Itoa(id), broadcaster.ReadCh)
 		id++
-		mux.Unlock()
 		clientList.Add(*chatClient)
+		mux.Unlock()
 
 		// When count of clients will be mockClientsExpectedCount send them mock message
 		if clientList.Count() == mockClientsExpectedCount {
